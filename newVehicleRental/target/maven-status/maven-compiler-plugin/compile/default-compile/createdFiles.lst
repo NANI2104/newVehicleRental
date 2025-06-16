@@ -1,0 +1,7 @@
+com\newVehicleRental\newVehicleRental\NewVehicleRentalApplication.class
+com\newVehicleRental\newVehicleRental\controller\VehicleController.class
+com\newVehicleRental\newVehicleRental\config\SecurityConfig.class
+com\newVehicleRental\newVehicleRental\service\VehicleService.class
+com\newVehicleRental\newVehicleRental\repository\VehicleRepository.class
+com\newVehicleRental\newVehicleRental\model\vehicle.class
+com\newVehicleRental\newVehicleRental\controller\loginController.class

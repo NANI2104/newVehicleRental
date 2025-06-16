@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vehicles</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .blur {
+        filter: blur(4px);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body class="container my-4">
+    <h1 class="mb-4">Vehicle List</h1>
+
+    <!-- Flash Messages -->
+    <div
+      th:if="${message}"
+      class="alert alert-success"
+      th:text="${message}"
+    ></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- Vehicle Table -->
+    <div th:classappend="${bookingSuccess} ? 'blur' : ''">
+      <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th>Make</th>
+            <th>Model</th>
+            <th>Type</th>
+            <th>Color</th>
+            <th>Year</th>
+            <th>Price Per Day</th>
+            <th>Available</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- CUSTOMER View -->
+          <tr
+            th:each="vehicle : ${vehicles}"
+            sec:authorize="hasRole('CUSTOMER')"
+            th:if="${vehicle.available}"
+          >
+            <td th:text="${vehicle.make}"></td>
+            <td th:text="${vehicle.model}"></td>
+            <td th:text="${vehicle.type}"></td>
+            <td th:text="${vehicle.color}"></td>
+            <td th:text="${vehicle.year}"></td>
+            <td
+              th:text="${#numbers.formatDecimal(vehicle.pricePerDay, 1, 'POINT', 2, 'NONE')}"
+            ></td>
+            <td th:text="${vehicle.available} ? 'Yes' : 'No'"></td>
+            <td>
+              <form
+                th:action="@{'/vehicles/book/' + ${vehicle.id}}"
+                method="post"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-sm"
+                  th:disabled="${!vehicle.available}"
+                >
+                  Book Now
+                </button>
+              </form>
+            </td>
+          </tr>
+
+          <!-- ADMIN View -->
+          <tr th:each="vehicle : ${vehicles}" sec:authorize="hasRole('ADMIN')">
+            <td th:text="${vehicle.make}"></td>
+            <td th:text="${vehicle.model}"></td>
+            <td th:text="${vehicle.type}"></td>
+            <td th:text="${vehicle.color}"></td>
+            <td th:text="${vehicle.year}"></td>
+            <td
+              th:text="${#numbers.formatDecimal(vehicle.pricePerDay, 1, 'POINT', 2, 'NONE')}"
+            ></td>
+            <td th:text="${vehicle.available} ? 'Yes' : 'No'"></td>
+            <td>
+              <!-- Availability Toggle -->
+              <form
+                th:action="@{'/vehicles/updateAvailability/' + ${vehicle.id}}"
+                method="post"
+                class="d-inline"
+              >
+                <input
+                  type="hidden"
+                  name="available"
+                  th:value="${!vehicle.available}"
+                />
+                <button
+                  type="submit"
+                  th:class="'btn btn-sm ' + (vehicle.available ? 'btn-warning' : 'btn-success')"
+                  th:text="${vehicle.available ? 'Mark as Unavailable' : 'Mark as Available'}"
+                ></button>
+              </form>
+
+              <!-- Delete Button -->
+              <form
+                th:action="@{'/vehicles/delete/' + ${vehicle.id}}"
+                method="post"
+                onsubmit="return confirm('Are you sure you want to delete this vehicle?');"
+                class="d-inline"
+              >
+                <button type="submit" class="btn btn-danger btn-sm">
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Admin Add Vehicle Form -->
+    <div sec:authorize="hasRole('ADMIN')">
+      <h2>Add Vehicle</h2>
+      <form th:action="@{/vehicles/add}" method="post" class="mb-4">
+        <input
+          type="text"
+          name="make"
+          placeholder="Make"
+          required
+          class="form-control mb-2"
+        />
+        <input
+          type="text"
+          name="model"
+          placeholder="Model"
+          required
+          class="form-control mb-2"
+        />
+        <input
+          type="text"
+          name="type"
+          placeholder="Type"
+          required
+          class="form-control mb-2"
+        />
+        <input
+          type="text"
+          name="color"
+          placeholder="Color"
+          required
+          class="form-control mb-2"
+        />
+        <input
+          type="number"
+          name="year"
+          placeholder="Year"
+          min="1900"
+          max="2100"
+          required
+          class="form-control mb-2"
+        />
+        <input
+          type="number"
+          step="0.01"
+          name="pricePerDay"
+          placeholder="Price Per Day"
+          min="0"
+          required
+          class="form-control mb-2"
+        />
+        <div class="form-check my-2">
+          <input
+            type="checkbox"
+            name="available"
+            value="true"
+            class="form-check-input"
+            id="availableCheck"
+          />
+          <label class="form-check-label" for="availableCheck">Available</label>
+        </div>
+        <button type="submit" class="btn btn-success">Add Vehicle</button>
+      </form>
+    </div>
+  </body>
+</html>
